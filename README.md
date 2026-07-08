@@ -6,16 +6,9 @@ Code-X is a lightweight, terminal-based Unicode Steganography tool built specifi
 It features a built-in terminal UI, start-up animation, and automatic clipboard integration via the Termux API.
 
 ## ⚙️ Installation (Termux/linux)
-
-To use the automatic copy-to-clipboard feature, you must install Python and the Termux API package. Run the following commands in your Termux or kali terminal:
-
 ```bash
 # Update packages
 apt update && apt upgrade -y
-
-# Install Python and Termux API
-apt install python -y
-apt install termux-api -y
 
 # Clone the repository
 git clone https://github.com/yosephalgnahe-cloud/Code-X.git
