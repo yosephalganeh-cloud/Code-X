@@ -11,6 +11,6 @@ It features a built-in terminal UI, start-up animation, and automatic clipboard 
 apt update && apt upgrade -y
 
 # Clone the repository
-git clone https://github.com/yosephalgnahe-cloud/Code-X.git
+git clone https://github.com/yosephalganeh-cloud/Code-X.git
 cd Code-X
 python3 codex.py
