@@ -1,4 +1,5 @@
-"
+#!/usr/bin/env python3
+"""
 Code-X — zero-width Unicode steganography tool
 Encodes/decodes hidden text inside an emoji (or any string) using
 invisible zero-width characters (U+200B / U+200C).
@@ -10,8 +11,6 @@ system instead of hard-depending on termux-api.
 import os
 import sys
 import time
-import shutil
-import subprocess
 
 # --- Animation & UI ---
 def animate_text(text, delay=0.03):
@@ -32,7 +31,7 @@ def show_banner():
      ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝    ╚═╝  ╚═╝
     \033[0m"""
     print(banner)
-    print("\033[96m" + " " * 12 + "Code-X — by Yoseph Alganeh\033[0m\n")
+    print("\033[96m" + " " * 12 + "Developer: Yoseph Alganeh\033[0m\n")
     animate_text("\033[93m[+] Booting Code-X Engine...\033[0m", 0.04)
     animate_text("\033[93m[+] Initializing Zero-Width Subroutines...\033[0m", 0.02)
     time.sleep(0.3)
@@ -44,7 +43,8 @@ def encode_message(cover, hidden_text):
     Works with an emoji, a word, or a whole sentence as the cover."""
     if not hidden_text:
         return cover
-    binary = ''.join(format(ord(c), '08b') for c in hidden_text.encode('utf-8').decode('utf-8'))
+    utf8_bytes = hidden_text.encode('utf-8')
+    binary = ''.join(format(b, '08b') for b in utf8_bytes)
     zero_width_mapping = {'0': '\u200b', '1': '\u200c'}
     hidden_unicode = ''.join(zero_width_mapping[bit] for bit in binary)
     return cover + hidden_unicode
@@ -68,56 +68,6 @@ def decode_message(encoded_text):
     except (ValueError, UnicodeDecodeError):
         return "[!] Corrupted or non-text payload detected."
 
-# --- Cross-platform clipboard handling ---
-def copy_to_clipboard(text):
-    """
-    Try, in order:
-      1. termux-clipboard-set (if present, e.g. Termux with termux-api installed)
-      2. wl-copy (Wayland, common on some Kali/Linux desktops)
-      3. xclip (X11, common on Kali Linux)
-      4. xsel (X11 fallback)
-      5. pbcopy (macOS, just in case)
-      6. pyperclip (cross-platform python lib, if installed)
-    Falls back to printing the payload for manual copy.
-    """
-    candidates = [
-        (['termux-clipboard-set'], None),
-        (['wl-copy'], None),
-        (['xclip', '-selection', 'clipboard'], None),
-        (['xsel', '--clipboard', '--input'], None),
-        (['pbcopy'], None),
-    ]
-
-    for cmd, _ in candidates:
-        exe = shutil.which(cmd[0])
-        if exe:
-            try:
-                proc = subprocess.Popen(cmd, stdin=subprocess.PIPE)
-                proc.communicate(input=text.encode('utf-8'))
-                if proc.returncode == 0:
-                    print(f"\n\033[92m[✓] Copied to clipboard using '{cmd[0]}'.\033[0m")
-                    return
-            except Exception:
-                continue
-
-    # Try pyperclip as a last automated option
-    try:
-        import pyperclip
-        pyperclip.copy(text)
-        print("\n\033[92m[✓] Copied to clipboard using pyperclip.\033[0m")
-        return
-    except Exception:
-        pass
-
-    # Nothing worked — manual fallback
-    print("\n\033[91m[!] No clipboard tool found on this system.\033[0m")
-    print("\033[93m[!] Install one of the following for auto-copy:\033[0m")
-    print("    Termux:      pkg install termux-api")
-    print("    Kali/Linux:  sudo apt install xclip   (or xsel / wl-clipboard)")
-    print("    Any OS:      pip install pyperclip")
-    print("\033[93m[!] Payload (copy manually):\033[0m\n")
-    print(f"> {text} <")
-
 # --- Main Interface ---
 def main():
     show_banner()
@@ -135,8 +85,8 @@ def main():
 
             result = encode_message(emoji_cover, secret_msg)
             animate_text("\n\033[93m[+] Injecting payload...\033[0m", 0.05)
-            copy_to_clipboard(result)
-            print()
+            print("\n\033[92m[✓] Encoded payload:\033[0m\n")
+            print(f"> {result} <\n")
 
         elif choice == '2':
             print("\n\033[95m--- DECODER ---\033[0m")
